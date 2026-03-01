@@ -245,6 +245,24 @@ Disconnect a vault from a publish site.
 ob publish-unlink [--path <local-path>]
 ```
 
+## Guided setup
+
+An interactive setup script walks through login, vault selection, sync configuration, and optionally installs a macOS background daemon:
+
+```bash
+bash scripts/setup-vault.sh <vault-path>
+```
+
+## macOS background sync
+
+On macOS, you can run sync as a LaunchAgent that starts on login and auto-restarts on failure. See [MACOS-DAEMON.md](MACOS-DAEMON.md) for details.
+
+```bash
+bash scripts/macos-daemon.sh install <vault-path>
+bash scripts/macos-daemon.sh status
+bash scripts/macos-daemon.sh logs <vault-path>
+```
+
 ## Native modules
 
 ### btime

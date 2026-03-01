@@ -21,6 +21,8 @@
 	"files": [
 		"cli.js",
 		"btime",
+		"scripts",
+		"MACOS-DAEMON.md",
 		"package.json",
 		"README.md"
 	],
