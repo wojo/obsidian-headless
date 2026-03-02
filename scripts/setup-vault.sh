@@ -29,16 +29,12 @@ echo ""
 echo "Step 1: Authentication"
 echo ""
 
-if ob login 2>&1 | grep -q "Logged in"; then
-  ob login
-  echo ""
-  read -rp "Continue with this account? [Y/n] " answer
-  if [[ "$(echo "$answer" | tr '[:upper:]' '[:lower:]')" == "n" ]]; then
-    ob login --email "" --password ""
-  fi
-else
-  ob login
+if ! ob login 2>&1 | grep -q "Logged in"; then
+  die "Not logged in. Run 'ob login' first, then re-run this script."
 fi
+
+ob login
+
 echo ""
 
 # --- Step 2: Select or create remote vault ---
@@ -73,9 +69,7 @@ fi
 echo ""
 echo "Step 3: Device name"
 echo ""
-default_device="$(hostname) ($(uname -s))"
-read -rp "Device name [$default_device]: " device_name
-device_name="${device_name:-$default_device}"
+device_name="$(scutil --get ComputerName 2>/dev/null || hostname)"
 
 # --- Step 4: Sync setup ---
 
