@@ -61,9 +61,19 @@ Run 'ob sync-setup' first to configure this vault for syncing."
 }
 
 find_node() {
-  local node_path
+  local node_path candidate
+  # Prefer a pinned, keg-only Homebrew Node LTS that the native deps (better-sqlite3)
+  # support. The default `node` symlink follows Homebrew upgrades and can jump to a
+  # major those deps don't support yet, which silently breaks sync at runtime.
+  for candidate in \
+    /opt/homebrew/opt/node@24/bin/node \
+    /usr/local/opt/node@24/bin/node \
+    /opt/homebrew/opt/node@22/bin/node \
+    /usr/local/opt/node@22/bin/node; do
+    [[ -x "$candidate" ]] && { echo "$candidate"; return 0; }
+  done
   node_path="$(command -v node 2>/dev/null)" || die "node not found in PATH.
-Install Node.js 22+ from https://nodejs.org or via your package manager."
+Install a supported Node.js LTS ('brew install node@24') or get it from https://nodejs.org."
   echo "$node_path"
 }
 
@@ -96,11 +106,13 @@ cmd_install() {
   mkdir -p "$LAUNCH_AGENTS_DIR"
 
   # Build environment variables section
-  local env_vars=""
+  local env_vars="" node_bin_dir
+  # Put the chosen node's own bin dir first so any child node it spawns matches.
+  node_bin_dir="$(dirname "$node_path")"
   env_vars+="        <key>HOME</key>
         <string>$HOME</string>
         <key>PATH</key>
-        <string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>"
+        <string>${node_bin_dir}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>"
 
   if [[ -n "${OBSIDIAN_AUTH_TOKEN:-}" ]]; then
     env_vars+="
